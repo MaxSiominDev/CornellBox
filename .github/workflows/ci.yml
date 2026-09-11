@@ -1,7 +1,9 @@
 name: CI
 
+# Branches are checked once, through their pull request; main on every merge.
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
