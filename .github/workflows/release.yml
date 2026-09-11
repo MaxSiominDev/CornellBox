@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows binary
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            make
+            curl
+            tar
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+      - name: Build static freeglut
+        run: tools/build-freeglut-win32.sh
+      - name: Build cornellbox.exe
+        run: make windows EXTRA_CFLAGS=-Werror
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cornellbox-windows
+          path: cornellbox.exe
+
+  dist:
+    name: Submission archive
+    needs: windows
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cornellbox-windows
+      - name: Build the macOS binary
+        run: make EXTRA_CFLAGS=-Werror
+      - name: Render screenshots and pack
+        run: tools/make-dist.sh
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/cornellbox-semin.zip --generate-notes

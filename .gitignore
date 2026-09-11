@@ -1,0 +1,16 @@
+build/
+build-win/
+cornellbox
+cornellbox.exe
+*.o
+*.bmp
+third_party/
+.DS_Store
+dist/
+Задание для самостоятельной работы №1.docx
+~$дание для самостоятельной работы №1.docx
+параметры геометрии.docx
+cbox.zip
+~$*
+!tests/reference/*.bmp
+.idea
